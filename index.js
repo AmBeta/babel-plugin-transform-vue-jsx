@@ -101,6 +101,46 @@ module.exports = function (babel) {
                 attribute.replaceWith(t.JSXIdentifier(`domProps-${attr}`))
               }
             })
+          },
+          'FunctionDeclaration|FunctionExpression' (path) {
+            // do nothing for nested functions
+            if ((path.type === 'FunctionDeclaration' && path.parent.type !== 'Program') ||
+              (path.type === 'FunctionExpression' && path.parentPath.parentPath.parent.type !== 'Program')
+            ) {
+              path.stop()
+              return
+            }
+            // do nothing if (h) is already declared
+            if (path.scope.hasBinding('h')) {
+              return
+            }
+            // do nothing if there is (h) param
+            const params = path.get('params')
+            if (params.length && params[0].node.name === 'h') {
+              return
+            }
+            // do nothing if there is no JSX inside
+            const jsxChecker = {
+              hasJsx: false
+            }
+            path.traverse({
+              JSXElement () {
+                this.hasJsx = true
+              }
+            }, jsxChecker)
+            if (!jsxChecker.hasJsx) {
+              return
+            }
+
+            path.get('body').unshiftContainer('body', t.variableDeclaration('const', [
+              t.variableDeclarator(
+                t.identifier('h'),
+                t.memberExpression(
+                  t.thisExpression(),
+                  t.identifier('$createElement')
+                )
+              )
+            ]))
           }
         })
       }
