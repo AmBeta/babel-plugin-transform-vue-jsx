@@ -104,12 +104,7 @@ module.exports = function (babel) {
           },
           'FunctionDeclaration|FunctionExpression' (path) {
             // do nothing for nested functions
-            if ((path.type === 'FunctionDeclaration' && path.parent.type !== 'Program') ||
-              (path.type === 'FunctionExpression' && path.parentPath.parentPath.parent.type !== 'Program')
-            ) {
-              path.stop()
-              return
-            }
+            path.stop()
             // do nothing if (h) is already declared
             if (path.scope.hasBinding('h')) {
               return

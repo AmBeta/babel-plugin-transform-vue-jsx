@@ -1,7 +1,7 @@
 const babel = require('babel-core')
 const result = babel.transform(`
   // function declaration
-  function getColumnsDeclaration() {
+  export function getColumnsDeclaration() {
     function inner() {
       return {
         x: () => (<span />)
@@ -15,7 +15,7 @@ const result = babel.transform(`
   }
 
   // function expression
-  const getColumnsExpression = function () {
+  export const getColumnsExpression = function () {
     return {
       a: () => (<input />),
       b: () => (<button />)
